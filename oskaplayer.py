@@ -7,6 +7,8 @@ class Board:
         self.width, self.height = self.getDimensions()  # width and height of board
         self.board = self.makeBoard(input)  # parsed game board
         self.winner = None  # TODO: winning player method
+    
+    # *********** CONSTRUCTOR METHODS *********** #
 
     def makeBoard(self, input):
         '''
@@ -20,8 +22,6 @@ class Board:
         for row in input:
             board.append(list(row))
         return board
-
-    # *********** CONSTRUCTOR METHODS *********** #
 
     def getNumPieces(self, input):
         '''
