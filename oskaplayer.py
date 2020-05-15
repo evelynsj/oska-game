@@ -2,12 +2,20 @@
 
 import math
 
+# ***** CHARACTER CONSTANTS ***** #
 WHITE = 'w'
 BLACK = 'b'
 EMPTY_SPACE = '-'
+
+# ***** WHITE MOVES ***** #
 MOVE_DOWN = "move down"
 MOVE_DOWN_LEFT = "move down left"
 MOVE_DOWN_RIGHT = "move down right"
+JUMP_DOWN = "jump down"
+JUMP_DIAG_LEFT = "jump diagonal left"
+JUMP_DIAG_RIGHT = "jump diagonal right"
+JUMP_DOWN_DIAG_RIGHT = "jump down diagonal right"
+JUMP_DIAG_LEFT_DOWN = "jump diagonal left down"
 
 
 class Game:
@@ -18,11 +26,11 @@ class Game:
 
     def play(self):
         # TODO: while no winner, keep making moves and taking turns
-        self.movegen()
+        self.moveGen()
 
     # *********** MOVE GENERATOR METHODS *********** #
 
-    def movegen(self):
+    def moveGen(self):
         board = self.state.board
         for i in range(self.state.numRows):
             for j in range(len(board[i])):
@@ -34,13 +42,13 @@ class Game:
         moves = []
         if (self.player == WHITE):
             whiteMoves = self.moveWhite(i, j)
+            whiteJumps = self.jumpWhite(i, j)
             if (whiteMoves):
                 moves = moves + whiteMoves
-            # TODO: jump forward
+            if (whiteJumps):
+                moves = moves + whiteJumps
         elif (self.player == BLACK):  # TODO
             pass
-
-        print(moves)
 
     def moveWhite(self, i, j):
         '''
@@ -63,6 +71,38 @@ class Game:
         elif (i >= self.state.midpoint):
             if (i + 1 < numRows and j + 1 < len(board[i + 1]) and board[i + 1][j + 1] == EMPTY_SPACE):
                 moves.append(MOVE_DOWN_RIGHT)
+
+        return moves
+
+    def jumpWhite(self, i, j):
+        '''
+            This function returns all possible jumps that white player can make
+            Parameters:
+                @i: row position of white player
+                @j: column position of white player
+            Return:
+                @moves: list of all possible jumps by verifying the bounds, if the space is occupied, and that it skips over black player. The move names do not reflect the actual oska board but rather the internal representation.
+        '''
+        moves = []
+        board = self.state.board
+        numRows = self.state.numRows
+
+        if (i + 2 < numRows):  # Jumping skips over one tile
+            if (i == self.state.midpoint - 1):  # row before midpoint
+                if (j + 1 < len(board[i + 2]) and board[i + 1][j] == BLACK and board[i + 2][j + 1] == EMPTY_SPACE):
+                    moves.append(JUMP_DOWN_DIAG_RIGHT)
+                if (j - 1 >= 0 and board[i + 1][j - 1] == BLACK and board[i + 2][j - 1] == EMPTY_SPACE):
+                    moves.append(JUMP_DIAG_LEFT_DOWN)
+            else:
+                # white can jump down at row before midpoint - 1 and at and after midpoint
+                if (j < len(board[i + 2]) and board[i + 1][j] == BLACK and board[i + 2][j] == EMPTY_SPACE):
+                    moves.append(JUMP_DOWN)
+                # row before midpoint - 1
+                if (i < self.state.midpoint - 1 and j - 2 >= 0 and board[i + 1][j - 1] == BLACK and board[i + 2][j - 2] == EMPTY_SPACE):
+                    moves.append(JUMP_DIAG_LEFT)
+                # row at and after midpoint
+                elif (j + 2 < len(board[i + 2]) and board[i + 1][j + 1] == BLACK and board[i + 2][j + 2] == EMPTY_SPACE):
+                    moves.append(JUMP_DIAG_RIGHT)
 
         return moves
 
