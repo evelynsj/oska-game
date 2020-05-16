@@ -17,6 +17,11 @@ JUMP_DIAG_RIGHT = "jump diagonal right"
 JUMP_DOWN_DIAG_RIGHT = "jump down diagonal right"
 JUMP_DIAG_LEFT_DOWN = "jump diagonal left down"
 
+# ***** BLACK MOVES ***** #
+MOVE_UP = "move up"
+MOVE_UP_LEFT = "move up left"
+MOVE_UP_RIGHT = "move up right"
+
 
 class Game:
     def __init__(self, board, firstPlayer):
@@ -47,8 +52,11 @@ class Game:
                 moves = moves + whiteMoves
             if (whiteJumps):
                 moves = moves + whiteJumps
-        elif (self.player == BLACK):  # TODO
-            pass
+        elif (self.player == BLACK):
+            blackMoves = self.possibleBlackMoves(i, j)
+            if (blackMoves):
+                moves = moves + blackMoves
+            # TODO: blackjumps
 
     def possibleWhiteMoves(self, i, j):
         '''
@@ -104,6 +112,23 @@ class Game:
                 elif (j + 2 < len(board[i + 2]) and board[i + 1][j + 1] == BLACK and board[i + 2][j + 2] == EMPTY_SPACE):
                     moves.append(JUMP_DIAG_RIGHT)
 
+        return moves
+
+    def possibleBlackMoves(self, i, j):
+        moves = []
+        board = self.state.board
+
+        if (i - 1 >= 0):
+            if (j < len(board[i - 1]) and board[i - 1][j] == EMPTY_SPACE):
+                moves.append(MOVE_UP)
+            if (i <= self.state.midpoint):  # Row before or at midpoint
+                # diagonal right up
+                if (j + 1 < len(board[i - 1]) and board[i - 1][j + 1] == EMPTY_SPACE):
+                    moves.append(MOVE_UP_RIGHT)
+            elif (i > self.state.midpoint):  # After midpoint
+                # diagonal left up
+                if (i - 1 >= 0 and j - 1 >= 0 and board[i - 1][j - 1] == EMPTY_SPACE):
+                    moves.append(MOVE_UP_LEFT)
         return moves
 
 
