@@ -41,8 +41,8 @@ class Game:
     def possibleMoves(self, i, j):
         moves = []
         if (self.player == WHITE):
-            whiteMoves = self.moveWhite(i, j)
-            whiteJumps = self.jumpWhite(i, j)
+            whiteMoves = self.possibleWhiteMoves(i, j)
+            whiteJumps = self.possibleWhiteJumps(i, j)
             if (whiteMoves):
                 moves = moves + whiteMoves
             if (whiteJumps):
@@ -50,7 +50,7 @@ class Game:
         elif (self.player == BLACK):  # TODO
             pass
 
-    def moveWhite(self, i, j):
+    def possibleWhiteMoves(self, i, j):
         '''
             This function returns all possible moves that white player can make
             Parameters:
@@ -74,7 +74,7 @@ class Game:
 
         return moves
 
-    def jumpWhite(self, i, j):
+    def possibleWhiteJumps(self, i, j):
         '''
             This function returns all possible jumps that white player can make
             Parameters:
