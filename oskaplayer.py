@@ -1,6 +1,7 @@
 # oskaplayer(['wwww','---','--','---','bbbb'],'w',2)
 
 import math
+import copy
 
 # ***** CHARACTER CONSTANTS ***** #
 WHITE = 'w'
@@ -8,25 +9,88 @@ BLACK = 'b'
 EMPTY_SPACE = '-'
 
 # ***** WHITE MOVES ***** #
-MOVE_DOWN = "move down"
-MOVE_DOWN_LEFT = "move down left"
-MOVE_DOWN_RIGHT = "move down right"
-JUMP_DOWN = "jump down"
-JUMP_DOWN_LEFT = "jump down left"
-JUMP_DOWN_RIGHT = "jump down right"
-JUMP_DOWN_DIAG_RIGHT = "jump down diagonal right"
-JUMP_DIAG_LEFT_DOWN = "jump diagonal left down"
+MOVE_DOWN = {
+    "description": "move down",
+    "i": 1,
+    "j": 0
+}
+MOVE_DOWN_LEFT = {
+    "description": "move down left",
+    "i": 1,
+    "j": -1
+}
+MOVE_DOWN_RIGHT = {
+    "description": "move down right",
+    "i": 1,
+    "j": 1
+}
+JUMP_DOWN = {
+    "description": "jump down",
+    "i": 2,
+    "j": 0
+}
+JUMP_DOWN_LEFT = {
+    "description": "jump down left",
+    "i": 2,
+    "j": -2
+}
+JUMP_DOWN_RIGHT = {
+    "description": "jump down right",
+    "i": 2,
+    "j": 2
+}
+JUMP_DOWN_DIAG_RIGHT = {
+    "description": "jump down diagonal right",
+    "i": 2,
+    "j": 1
+}
+JUMP_DIAG_LEFT_DOWN = {
+    "description": "jump diagonal left down",
+    "i": 2,
+    "j": -1
+}
 
 # ***** BLACK MOVES ***** #
-MOVE_UP = "move up"
-MOVE_UP_LEFT = "move up left"
-MOVE_UP_RIGHT = "move up right"
-JUMP_UP = "jump up"
-JUMP_UP_LEFT = "jump up left"
-JUMP_UP_RIGHT = "jump up right"
-JUMP_UP_DIAG_RIGHT = "jump up diagonal right"
-JUMP_DIAG_LEFT_UP = "jump diagonal left up"
-
+MOVE_UP = {
+    "description": "move up",
+    "i": -1,
+    "j": 0
+}
+MOVE_UP_LEFT = {
+    "description": "move up left",
+    "i": -1,
+    "j": -1
+}
+MOVE_UP_RIGHT = {
+    "description": "move up right",
+    "i": -1,
+    "j": 1
+}
+JUMP_UP = {
+    "description": "jump up",
+    "i": -2,
+    "j": 0
+}
+JUMP_UP_LEFT = {
+    "description": "jump up left",
+    "i": -2,
+    "j": -2
+}
+JUMP_UP_RIGHT = {
+    "description": "jump up right",
+    "i": -2,
+    "j": 2
+}
+JUMP_UP_DIAG_RIGHT = {
+    "description": "jump up diagonal right",
+    "i": -2,
+    "j": 1
+}
+JUMP_DIAG_LEFT_UP = {
+    "description": "jump diagonal left up",
+    "i": -2,
+    "j": -1
+}
 
 class Game:
     def __init__(self, board, firstPlayer):
@@ -42,11 +106,16 @@ class Game:
 
     def moveGen(self):
         board = self.state.board
+        newStates = []
+
         for i in range(self.state.numRows):
             for j in range(len(board[i])):
                 if (board[i][j] == self.player):
-                    self.possibleMoves(i, j)
-                    # TODO: make moves, return list of boards
+                    moves = self.possibleMoves(i, j)
+                    states = self.generateNewStates(moves, i, j)
+                    newStates = newStates + states
+    
+        return newStates
 
     def possibleMoves(self, i, j):
         '''
@@ -74,7 +143,22 @@ class Game:
                 moves = moves + blackJumps
 
         return moves
-            
+
+    def generateNewStates(self, possibleMoves, i, j):
+        newStates = []
+        for move in possibleMoves:
+            newI = i + move["i"]
+            newJ = j + move["j"]
+
+            newState = copy.deepcopy(self.state)
+            newBoard = newState.board
+            newBoard[i][j] = EMPTY_SPACE
+            newBoard[newI][newJ] = self.player
+
+            newStates.append(newState)
+
+        return newStates
+
     def possibleWhiteMoves(self, i, j):
         '''
             This function returns all possible moves that white player can make
@@ -186,6 +270,7 @@ class Game:
                     moves.append(JUMP_UP_RIGHT)
 
         return moves
+
 
 class Board:
     def __init__(self, input):
