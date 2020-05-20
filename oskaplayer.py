@@ -98,18 +98,38 @@ class Game:
         self.state = board  # current state of the game
         self.player = firstPlayer
         self.winner = None  # TODO: winning player method, may not need
-        self.maximumDepth = depth
+        self.depth = depth
 
     def play(self):
         '''
             This function solves the Oska game
         '''
-        # TODO: while no winner, keep making moves and taking turns
-        # self.moveGen()
         self.minimax()
 
     def minimax(self):
-        print("minimax")
+        bestVal = 0
+        if (self.depth == 0):
+            print("depth")
+            return -1# TODO: code evaluation
+        
+        if (self.player == WHITE): # maximizing player
+            bestVal = -math.inf
+            nextStates = self.moveGen() # get nextStates
+            for state in nextStates:
+                nextState = copy.deepcopy(state)
+                game = Game(nextState, BLACK, self.depth - 1)
+                childVal = game.minimax()
+                bestVal = max(bestVal, childVal)
+        elif (self.player == BLACK):
+            bestVal = math.inf
+            nextStates = self.moveGen() # get nextStates
+            for state in nextStates:
+                nextState = copy.deepcopy(state)
+                game = Game(nextState, WHITE, self.depth - 1)
+                childVal = game.minimax()
+                bestVal = min(bestVal, childVal)
+
+        return bestVal
 
     # *********** MOVE GENERATOR METHODS *********** #
 
