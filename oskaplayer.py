@@ -110,11 +110,12 @@ class Game:
         bestVal = 0
         if (self.depth == 0):
             print("depth")
-            return -1# TODO: code evaluation
-        
-        if (self.player == WHITE): # maximizing player
+            self.eval()
+            return -1  # TODO: code evaluation
+
+        if (self.player == WHITE):  # maximizing player
             bestVal = -math.inf
-            nextStates = self.moveGen() # get nextStates
+            nextStates = self.moveGen()  # get nextStates
             for state in nextStates:
                 nextState = copy.deepcopy(state)
                 game = Game(nextState, BLACK, self.depth - 1)
@@ -122,7 +123,7 @@ class Game:
                 bestVal = max(bestVal, childVal)
         elif (self.player == BLACK):
             bestVal = math.inf
-            nextStates = self.moveGen() # get nextStates
+            nextStates = self.moveGen()  # get nextStates
             for state in nextStates:
                 nextState = copy.deepcopy(state)
                 game = Game(nextState, WHITE, self.depth - 1)
@@ -130,6 +131,34 @@ class Game:
                 bestVal = min(bestVal, childVal)
 
         return bestVal
+
+    def eval(self):
+        if (self.hasWon(WHITE)):
+            return 100
+        elif (self.hasWon(BLACK)):
+            return -100
+
+    def hasWon(self, player):
+        print("haswon?", player)
+        numWhite = 0
+        numBlack = 0
+        opponent = BLACK if player == WHITE else WHITE
+        board = self.state.board
+        numRows = self.state.numRows
+
+        # get number of player pieces
+        for row in board:
+            numWhite += row.count(WHITE)
+            numBlack += row.count(BLACK)
+
+        if (player == WHITE):
+            if (numBlack == 0 or board[numRows - 1].count(WHITE) == numWhite):
+                return True
+        elif (player == BLACK):
+            if (numWhite == 0 or board[0].count(BLACK) == numBlack):
+                return True
+
+        return False
 
     # *********** MOVE GENERATOR METHODS *********** #
 
