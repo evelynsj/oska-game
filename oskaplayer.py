@@ -94,17 +94,22 @@ JUMP_DIAG_LEFT_UP = {
 
 
 class Game:
-    def __init__(self, board, firstPlayer):
+    def __init__(self, board, firstPlayer, depth):
         self.state = board  # current state of the game
         self.player = firstPlayer
-        self.winner = None  # TODO: winning player method
+        self.winner = None  # TODO: winning player method, may not need
+        self.maximumDepth = depth
 
     def play(self):
         '''
             This function solves the Oska game
         '''
         # TODO: while no winner, keep making moves and taking turns
-        self.moveGen()
+        # self.moveGen()
+        self.minimax()
+
+    def minimax(self):
+        print("minimax")
 
     # *********** MOVE GENERATOR METHODS *********** #
 
@@ -366,5 +371,5 @@ def movegen(inputBoard, player):
 
 def oskaplayer(inputBoard, firstPlayer, depth):
     gameBoard = Board(inputBoard)  # create representation
-    game = Game(gameBoard, firstPlayer)  # create instance of game
+    game = Game(gameBoard, firstPlayer, depth)  # create instance of game
     game.play()
