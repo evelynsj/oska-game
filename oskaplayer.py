@@ -27,27 +27,37 @@ MOVE_DOWN_RIGHT = {
 JUMP_DOWN = {
     "description": "jump down",
     "i": 2,
-    "j": 0
+    "j": 0,
+    "iCapture": 1,
+    "jCapture": 0
 }
 JUMP_DOWN_LEFT = {
     "description": "jump down left",
     "i": 2,
-    "j": -2
+    "j": -2,
+    "iCapture": 1,
+    "jCapture": -1
 }
 JUMP_DOWN_RIGHT = {
     "description": "jump down right",
     "i": 2,
-    "j": 2
+    "j": 2,
+    "iCapture": 1,
+    "jCapture": 1
 }
 JUMP_DOWN_DIAG_RIGHT = {
     "description": "jump down diagonal right",
     "i": 2,
-    "j": 1
+    "j": 1,
+    "iCapture": 1,
+    "jCapture": 0
 }
 JUMP_DIAG_LEFT_DOWN = {
     "description": "jump diagonal left down",
     "i": 2,
-    "j": -1
+    "j": -1,
+    "iCapture": 1,
+    "jCapture": -1
 }
 
 # ***** BLACK MOVES ***** #
@@ -69,27 +79,37 @@ MOVE_UP_RIGHT = {
 JUMP_UP = {
     "description": "jump up",
     "i": -2,
-    "j": 0
+    "j": 0,
+    "iCapture": -1,
+    "jCapture": 0
 }
 JUMP_UP_LEFT = {
     "description": "jump up left",
     "i": -2,
-    "j": -2
+    "j": -2,
+    "iCapture": -1,
+    "jCapture": -1
 }
 JUMP_UP_RIGHT = {
     "description": "jump up right",
     "i": -2,
-    "j": 2
+    "j": 2,
+    "iCapture": -1,
+    "jCapture": 1
 }
 JUMP_UP_DIAG_RIGHT = {
     "description": "jump up diagonal right",
     "i": -2,
-    "j": 1
+    "j": 1,
+    "iCapture": -1,
+    "jCapture": 0
 }
 JUMP_DIAG_LEFT_UP = {
     "description": "jump diagonal left up",
     "i": -2,
-    "j": -1
+    "j": -1,
+    "iCapture": -1,
+    "jCapture": -1
 }
 
 
@@ -97,21 +117,29 @@ class Game:
     def __init__(self, board, firstPlayer, depth):
         self.state = board  # current state of the game
         self.player = firstPlayer
-        self.winner = None  # TODO: winning player method, may not need
         self.depth = depth
 
     def play(self):
         '''
-            This function solves the Oska game
+            This function calls the minimax function to determine the next best move
+            Return:
+                @state: the next best state to take
         '''
-        self.minimax()
+        score, state = self.minimax()
+        return state
 
     def minimax(self):
+        '''
+            This function performs minimax by going down the game tree up until the specified depth and gets the best score for each player
+            Return:
+                @score: score propagated up from the evaluated states
+                @bestState: next best child state to choose 
+        '''
         bestVal = 0
+        bestState = self.state  # test
         if (self.depth == 0):
-            print("depth")
-            self.eval()
-            return -1  # TODO: code evaluation
+            score = self.eval()
+            return score, self.state
 
         if (self.player == WHITE):  # maximizing player
             bestVal = -math.inf
@@ -119,29 +147,65 @@ class Game:
             for state in nextStates:
                 nextState = copy.deepcopy(state)
                 game = Game(nextState, BLACK, self.depth - 1)
-                childVal = game.minimax()
+                childVal, childState = game.minimax()
                 bestVal = max(bestVal, childVal)
+
+                if (bestVal == childVal):
+                    bestState = nextState
         elif (self.player == BLACK):
             bestVal = math.inf
             nextStates = self.moveGen()  # get nextStates
             for state in nextStates:
                 nextState = copy.deepcopy(state)
                 game = Game(nextState, WHITE, self.depth - 1)
-                childVal = game.minimax()
+                childVal, childState = game.minimax()
                 bestVal = min(bestVal, childVal)
+                if (bestVal == childVal):
+                    bestState = nextState
 
-        return bestVal
+        return bestVal, bestState
 
     def eval(self):
-        if (self.hasWon(WHITE)):
-            return 100
-        elif (self.hasWon(BLACK)):
-            return -100
-
-    def hasWon(self, player):
-        print("haswon?", player)
+        '''
+            This function evaluates a state by assigning +/-100 if either player has won. Otherwise, it evaluates the board by considering the number of both players remaining on the board and the number of players in the opponent's rows
+            Return:
+                @score: state's value that is evaluated using the heuristics
+        '''
         numWhite = 0
         numBlack = 0
+        board = self.state.board
+
+        # get number of player pieces
+        for row in board:
+            numWhite += row.count(WHITE)
+            numBlack += row.count(BLACK)
+
+        if (self.hasWon(WHITE, numWhite, numBlack)):
+            return 100
+        elif (self.hasWon(BLACK, numWhite, numBlack)):
+            return -100
+        else:
+            numWhiteOnBlackRow = 0
+            numBlackOnWhiteRow = 0
+            for lastRow in board[-1]:  # number of whites in black's starting position
+                numWhiteOnBlackRow = lastRow.count(WHITE)
+
+            for firstRow in board[0]:  # number of black in white's starting position
+                numBlackOnWhiteRow = firstRow.count(BLACK)
+
+            score = (numWhite - numBlack) + 2 * \
+                (numWhiteOnBlackRow - numBlackOnWhiteRow)
+
+            return score
+
+    def hasWon(self, player, numWhite, numBlack):
+        '''
+            This function determines whether white or black player has won by getting opponent's remaining pieces and if player's remaining pieces are in opponent's starting row
+            Parameters:
+                @player: either white or black
+                @numWhite: the number of white pieces remaining on the board
+                @numBlack: the number of black pieces remaining on the board
+        '''
         opponent = BLACK if player == WHITE else WHITE
         board = self.state.board
         numRows = self.state.numRows
@@ -224,8 +288,15 @@ class Game:
 
             newState = copy.deepcopy(self.state)
             newBoard = newState.board
+
             newBoard[i][j] = EMPTY_SPACE
             newBoard[newI][newJ] = self.player
+
+            if "jump" in move["description"]:
+                iCapture = i + move["iCapture"]
+                jCapture = j + move["jCapture"]
+
+                newBoard[iCapture][jCapture] = EMPTY_SPACE
 
             newStates.append(newState)
 
@@ -347,8 +418,7 @@ class Game:
 class Board:
     def __init__(self, input):
         self.numPieces = self.getNumPieces(input)  # number of pieces
-        # width and height of board TODO: prob don't need width
-        self.width, self.numRows = self.getDimensions()
+        self.numRows = self.getNumRows()  # number of rows in the board
         self.midpoint = self.getMidpoint()  # midpoint row of board
         self.board = self.makeBoard(input)  # parsed game board
 
@@ -377,16 +447,15 @@ class Board:
         '''
         return len(input[0])
 
-    def getDimensions(self):
+    def getNumRows(self):
         '''
             This function returns the width and the height of the board
             Return:
                 @width: the number of pieces
                 @height: the number of rows, (2 * number of pieces) - 3
         '''
-        width = self.numPieces
         height = (2 * self.numPieces) - 3  # Alternatively can use input length
-        return width, height
+        return height
 
     def getMidpoint(self):
         '''
@@ -421,4 +490,5 @@ def movegen(inputBoard, player):
 def oskaplayer(inputBoard, firstPlayer, depth):
     gameBoard = Board(inputBoard)  # create representation
     game = Game(gameBoard, firstPlayer, depth)  # create instance of game
-    game.play()
+    nextState = game.play()
+    nextState.printBoard()
