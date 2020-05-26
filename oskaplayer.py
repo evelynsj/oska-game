@@ -126,7 +126,11 @@ class Game:
                 @state: the next best state to take
         '''
         score, state = self.minimax()
-        return state
+        result = []
+        for row in state.board:
+            result.append("".join(row))
+
+        return result
 
     def minimax(self):
         '''
@@ -490,5 +494,5 @@ def movegen(inputBoard, player):
 def oskaplayer(inputBoard, firstPlayer, depth):
     gameBoard = Board(inputBoard)  # create representation
     game = Game(gameBoard, firstPlayer, depth)  # create instance of game
-    nextState = game.play()
-    nextState.printBoard()
+    nextBoard = game.play()
+    print(nextBoard)
